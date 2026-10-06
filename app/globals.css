@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #18212b; color: #edf2f7; font-family: Aptos, "Segoe UI", Roboto, system-ui, -apple-system, sans-serif; }
+button { font: inherit; }
+.surface { @apply rounded-[10px] border bg-[#202d3a] shadow-none; border-color: #354554; }
+.eyebrow { @apply text-[11px] font-semibold uppercase tracking-[.14em] text-muted; }
+
+/* Diagram motion mirrors the original Atlas interaction model. */
+@keyframes atlas-node-pulse { 0% { stroke-width: 2.5; filter: drop-shadow(0 0 0 transparent); } 45% { stroke-width: 6; filter: drop-shadow(0 0 10px rgba(0,120,212,.28)); } 100% { stroke-width: 4; filter: drop-shadow(0 0 3px rgba(0,120,212,.18)); } }
+@keyframes atlas-ripple { 0% { opacity: .72; r: 23px; } 100% { opacity: 0; r: 38px; } }
+.atlas-node-selected { animation: atlas-node-pulse .7s cubic-bezier(.2,.8,.2,1) both; }
+.atlas-node-ripple { fill: none; pointer-events: none; animation: atlas-ripple .7s ease-out both; }
+@keyframes atlas-reveal { from { opacity: 0; transform: translateY(8px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.atlas-node-reveal { transform-box: fill-box; transform-origin: center; animation: atlas-reveal .42s ease both; }
+.atlas-mode-button { opacity: .7; transition: opacity .2s, background .2s, color .2s; }
+.atlas-mode-button:hover, .atlas-mode-button[data-active="true"] { opacity: 1; }
+@keyframes atlas-arm-pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.atlas-arm-highlight { animation: atlas-arm-pulse 1.8s ease-in-out infinite; filter: drop-shadow(0 0 5px rgba(245,158,11,.42)); }
+@media (prefers-reduced-motion: reduce) { .atlas-node-selected, .atlas-node-ripple { animation: none !important; } }
