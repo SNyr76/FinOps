@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FinOps Atlas · Azure Cost Hierarchy</title>
+<link rel="stylesheet" href="styles.css"></head><body>
+<header>
+ <div class="brand-lockup"><div class="logo-placeholder" aria-label="Logo placeholder">LOGO</div><div><h1>FinOps <span>Atlas</span> · Azure</h1><div class="sub" id="src"></div></div></div>
+ <div class="header-actions"><button class="theme-toggle" id="azureThemeToggle" type="button" onclick="toggleAzureTheme()" aria-pressed="false"><span class="toggle-track"><span class="toggle-thumb"></span></span><span class="theme-toggle-label">Azure Portal theme</span></button><button class="btn" onclick="reset()">Reset view</button><label class="btn" for="f">Load cost CSV</label><input id="f" type="file" accept=".csv" hidden></div>
+</header>
+<nav class="tabs" role="tablist" aria-label="FinOps views">
+ <button class="tab active" id="tabHierarchy" role="tab" aria-selected="true" onclick="showTab('hierarchy')">Cost Hierarchy</button>
+ <button class="tab" id="tabSummary" role="tab" aria-selected="false" onclick="showTab('summary')">Cost Summary</button>
+ <button class="tab" id="tabOutliers" role="tab" aria-selected="false" onclick="showTab('outliers')">Outliers</button>
+ <button class="tab" id="tabRecommendations" role="tab" aria-selected="false" onclick="showTab('recommendations')">Recommendations</button>
+</nav>
+
+<section id="viewHierarchy" class="view active">
+ <div class="hierarchy-tools"><span class="sub">Hierarchy view</span><button class="btn mode-btn active" id="normalMode" onclick="setHierarchyMode('normal')">Normal</button><button class="btn mode-btn" id="outlierMode" onclick="setHierarchyMode('outliers')">Outliers</button><button class="btn mode-btn" id="recommendationMode" onclick="setHierarchyMode('recommendations')">Recommendations</button></div>
+ <div class="crumbs" id="crumbs"></div>
+ <main>
+  <section class="card" id="stage"><svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"></svg><svg id="svg" viewBox="0 0 1230 640" role="img" aria-label="Cost hierarchy"></svg>
+   <div class="leg"><span><i style="background:var(--c0)"></i>Tenant</span><span><i style="background:var(--c1)"></i>Subscription</span><span><i style="background:var(--c2)"></i>Resource group</span><span><i style="background:var(--c3)"></i>Resource</span><span><i style="background:var(--c4)"></i>Component</span><span>· Node size and stalk thickness = cost · click a node to expand / collapse and see its daily cost</span></div>
+  </section>
+  <aside class="card" id="panel"></aside>
+ </main>
+</section>
+
+<section id="viewOutliers" class="view insight-view"><div class="page-heading"><div><div class="sub">Anomaly monitoring</div><h2>Daily cost outliers</h2></div><span class="pill" style="background:#f59e0b">Review required</span></div><div class="insight-metrics"><div class="card metric"><div class="k">Anomalous records</div><div class="v" id="outlierCount">—</div></div><div class="card metric"><div class="k">Affected resources</div><div class="v" id="outlierResources">—</div></div><div class="card metric"><div class="k">Upward anomalies</div><div class="v" id="outlierUp">—</div></div></div><div class="card insight-card"><div class="insight-meta">Fictional sample data · one row per resource and day</div><div class="table-wrap"><table class="cost-table"><thead><tr><th>Date</th><th>Resource</th><th class="num">Total cost</th><th>Anomaly</th><th>Direction</th></tr></thead><tbody id="outlierBody"></tbody></table></div></div></section>
+
+<section id="viewRecommendations" class="view insight-view"><div class="page-heading"><div><div class="sub">Cost optimization</div><h2>Recommendations</h2></div><span class="pill" style="background:#10b981">Actionable opportunities</span></div><div class="insight-metrics"><div class="card metric"><div class="k">Recommendations</div><div class="v" id="recommendationCount">—</div></div><div class="card metric"><div class="k">Potential minimum</div><div class="v" id="recommendationMin">—</div></div><div class="card metric"><div class="k">Potential maximum</div><div class="v" id="recommendationMax">—</div></div></div><div class="card insight-card"><div class="insight-meta">Fictional sample data · ranked by potential maximum savings</div><div class="table-wrap"><table class="cost-table"><thead><tr><th>Resource</th><th>Category</th><th>Description</th><th>Service</th><th class="num">Current cost</th><th class="num">Min savings</th><th class="num">Max savings</th></tr></thead><tbody id="recommendationBody"></tbody></table></div></div></section>
+
+<section id="viewSummary" class="view summary">
+ <div class="sum-grid">
+  <div class="card metric"><div class="k">Total cost</div><div class="v" id="mTotal">—</div><div class="s" id="mPeriod">—</div></div>
+  <div class="card metric"><div class="k">Daily average</div><div class="v" id="mAvg">—</div><div class="s" id="mDays">—</div></div>
+  <div class="card metric"><div class="k">Peak day</div><div class="v" id="mPeak">—</div><div class="s" id="mPeakDate">—</div></div>
+  <div class="card metric"><div class="k">Active subscriptions</div><div class="v" id="mSubs">—</div><div class="s">with cost in loaded data</div></div>
+ </div>
+ <div class="sum-cols">
+  <div class="card sum-card"><h2>Cost trend</h2><div class="sub">Daily Azure spend across the selected cost data</div><svg id="summaryTrend" class="trend" viewBox="0 0 760 230" preserveAspectRatio="xMidYMid meet" aria-label="Daily cost trend"></svg></div>
+  <div class="card sum-card"><h2>Cost by subscription</h2><div class="sub">Highest spend first</div><div id="subList" class="sum-list"></div></div>
+ </div>
+ <div class="sum-cols">
+  <div class="card sum-card"><h2>Cost by service</h2><div class="sub">Largest service categories in the loaded data</div><div id="serviceList" class="sum-list"></div></div>
+  <div class="card sum-card"><h2>Top resources</h2><div class="sub">Highest-cost resources</div><div id="resourceList" class="sum-list"></div></div>
+ </div>
+</section>
+
+<section id="viewDrill" class="view drill-view">
+ <div class="drill-head">
+  <button class="btn" onclick="showTab('summary')">← Back to summary</button>
+  <div><div class="sub">Cost drill-through</div><h2 id="drillTitle">Item breakdown</h2></div>
+  <div class="drill-total"><small>Total cost</small><strong id="drillTotal">—</strong></div>
+ </div>
+ <div class="drill-graphs"><div class="card drill-chart"><h3 id="drillChartTitle">Cost breakdown</h3><svg id="drillChart" viewBox="0 0 760 250" preserveAspectRatio="xMidYMid meet"></svg></div><div class="card drill-chart"><h3>Daily cost</h3><svg id="drillDaily" viewBox="0 0 420 250" preserveAspectRatio="xMidYMid meet"></svg></div></div>
+ <div class="card drill-card"><div class="drill-meta"><span id="drillMeta"></span><button class="btn export-btn" onclick="exportDrillCSV()">Export CSV</button></div><div class="table-wrap"><table class="cost-table"><thead><tr><th data-sort="date">Date ↕</th><th data-sort="sub">Subscription ↕</th><th data-sort="rg">Resource group ↕</th><th data-sort="res">Resource ↕</th><th data-sort="service">Service ↕</th><th data-sort="comp">Component ↕</th><th data-sort="loc">Location ↕</th><th class="num" data-sort="cost">Cost ↕</th></tr></thead><tbody id="drillBody"></tbody></table></div><div class="pager"><button class="btn" id="prevPage">← Previous</button><span id="pageInfo"></span><button class="btn" id="nextPage">Next →</button></div></div>
+</section>
+<script src="app.js"></script></body></html>
